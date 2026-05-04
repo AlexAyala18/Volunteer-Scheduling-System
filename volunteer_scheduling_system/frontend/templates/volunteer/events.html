@@ -1,0 +1,359 @@
+<!-- frontend/templates/volunteer/events.html -->
+{% extends "base.html" %}
+
+{% block title %}Volunteer Opportunities - City of Laredo{% endblock %}
+
+{% block header %}Volunteer Opportunities{% endblock %}
+
+{% block content %}
+<div class="language-selector">
+  <button id="toggleLanguage" class="language-toggle">Español</button>
+</div>
+
+<div class="section">
+  <div class="instructions" id="pageIntro">
+    <p>Thank you for your interest in volunteering with the City of Laredo! Below you'll find current volunteer opportunities. Click on any event to sign up or learn more.</p>
+    <p>Volunteering is a great way to give back to your community, gain valuable experience, and make a difference in Laredo.</p>
+  </div>
+
+  <div class="search-container wide-search">
+    <input type="text" id="searchInput" placeholder="Search events by name, location, or description..." aria-label="Search events">
+  </div>
+
+  <div id="filterControls" class="dashboard-controls">
+    <div class="filter-group">
+      <label for="dateFilter">Filter by date:</label>
+      <select id="dateFilter">
+        <option value="all">All events</option>
+        <option value="upcoming">Upcoming events</option>
+        <option value="past">Past events</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="eventsList" class="event-list">
+    {% if events %}
+      {% for event in events %}
+        <div class="event-item" data-event-id="{{ event.event_id }}">
+          <h3>{{ event.event_name }}</h3>
+          
+          {% if event.event_location %}
+            <p><strong>Location:</strong> {{ event.event_location }}</p>
+          {% endif %}
+          
+          {% if event.event_start_date %}
+            {% if event.event_end_date %}
+              <p><strong>Dates:</strong> {{ event.event_start_date.split('T')[0] }} to {{ event.event_end_date.split('T')[0] }}</p>
+            {% else %}
+              <p><strong>Date:</strong> {{ event.event_start_date.split('T')[0] }}</p>
+            {% endif %}
+          {% endif %}
+          
+          {% if event.event_description %}
+            <p><strong>Description:</strong> {{ event.event_description }}</p>
+          {% endif %}
+          
+          {% if event.min_age and event.min_age > 0 %}
+            <p><strong>Minimum Age Requirement:</strong> {{ event.min_age }} years</p>
+          {% endif %}
+          
+          <div class="event-actions">
+            <a href="/volunteer/form/{{ event.event_id }}" class="primary-btn">Sign Up to Volunteer</a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-message" id="noEventsMessage">
+        <p>There are currently no volunteer opportunities available.</p>
+        <p>Please check back later for upcoming events.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Language toggle functionality
+    const toggleLanguageBtn = document.getElementById('toggleLanguage');
+    const pageIntro = document.getElementById('pageIntro');
+    const searchInput = document.getElementById('searchInput');
+    const dateFilter = document.getElementById('dateFilter');
+    const noEventsMessage = document.getElementById('noEventsMessage');
+    
+    let currentLanguage = 'en';
+    
+    const translations = {
+      en: {
+        title: 'Volunteer Opportunities',
+        intro: '<p>Thank you for your interest in volunteering with the City of Laredo! Below you\'ll find current volunteer opportunities. Click on any event to sign up or learn more.</p><p>Volunteering is a great way to give back to your community, gain valuable experience, and make a difference in Laredo.</p>',
+        searchPlaceholder: 'Search events by name, location, or description...',
+        dateFilterLabel: 'Filter by date:',
+        allEvents: 'All events',
+        upcomingEvents: 'Upcoming events',
+        pastEvents: 'Past events',
+        location: 'Location',
+        dates: 'Dates',
+        date: 'Date',
+        description: 'Description',
+        minAge: 'Minimum Age Requirement',
+        years: 'years',
+        signUp: 'Sign Up to Volunteer',
+        noEvents: '<p>There are currently no volunteer opportunities available.</p><p>Please check back later for upcoming events.</p>',
+        toggleLanguage: 'Español'
+      },
+      es: {
+        title: 'Oportunidades de Voluntariado',
+        intro: '<p>¡Gracias por su interés en ser voluntario con la Ciudad de Laredo! A continuación encontrará oportunidades de voluntariado actuales. Haga clic en cualquier evento para inscribirse u obtener más información.</p><p>El voluntariado es una excelente manera de retribuir a su comunidad, obtener experiencia valiosa y marcar la diferencia en Laredo.</p>',
+        searchPlaceholder: 'Buscar eventos por nombre, ubicación o descripción...',
+        dateFilterLabel: 'Filtrar por fecha:',
+        allEvents: 'Todos los eventos',
+        upcomingEvents: 'Próximos eventos',
+        pastEvents: 'Eventos pasados',
+        location: 'Ubicación',
+        dates: 'Fechas',
+        date: 'Fecha',
+        description: 'Descripción',
+        minAge: 'Requisito de Edad Mínima',
+        years: 'años',
+        signUp: 'Inscribirse como Voluntario',
+        noEvents: '<p>Actualmente no hay oportunidades de voluntariado disponibles.</p><p>Por favor, vuelva más tarde para ver los próximos eventos.</p>',
+        toggleLanguage: 'English'
+      }
+    };
+    
+    function updateLanguage(lang) {
+      currentLanguage = lang;
+      const t = translations[lang];
+      
+      // Update page title and header
+      document.title = t.title + ' - City of Laredo';
+      document.querySelector('h1').textContent = t.title;
+      
+      // Update intro text
+      pageIntro.innerHTML = t.intro;
+      
+      // Update search placeholder
+      searchInput.placeholder = t.searchPlaceholder;
+      
+      // Update date filter
+      document.querySelector('label[for="dateFilter"]').textContent = t.dateFilterLabel;
+      dateFilter.options[0].textContent = t.allEvents;
+      dateFilter.options[1].textContent = t.upcomingEvents;
+      dateFilter.options[2].textContent = t.pastEvents;
+      
+    // Store original event data when page loads if not already stored
+    if (!window.originalEventData) {
+      window.originalEventData = [];
+      document.querySelectorAll('.event-item').forEach(item => {
+        const eventData = {
+          id: item.getAttribute('data-event-id'),
+          name: item.querySelector('h3').textContent,
+          paragraphs: []
+        };
+        
+        // Store all paragraph content
+        item.querySelectorAll('p').forEach(p => {
+          const strong = p.querySelector('strong');
+          if (strong) {
+            const label = strong.textContent.trim();
+            const content = p.textContent.replace(label, '').trim();
+            eventData.paragraphs.push({
+              type: label.endsWith(':') ? label.slice(0, -1) : label,
+              content: content
+            });
+          }
+        });
+        
+        window.originalEventData.push(eventData);
+      });
+    }
+    
+    // Update event items
+    document.querySelectorAll('.event-item').forEach(item => {
+      const eventId = item.getAttribute('data-event-id');
+      const originalData = window.originalEventData.find(e => e.id === eventId);
+      
+      if (!originalData) return;
+      
+      // Get all paragraph elements in this event item
+      const paragraphs = item.querySelectorAll('p');
+      
+      paragraphs.forEach(paragraph => {
+        const strong = paragraph.querySelector('strong');
+        if (!strong) return;
+        
+        const text = strong.textContent.trim();
+        const textWithoutColon = text.endsWith(':') ? text.slice(0, -1) : text;
+        
+        // Find the matching original data
+        const originalParagraph = originalData.paragraphs.find(p => 
+          p.type === 'Location' && (textWithoutColon === 'Location' || textWithoutColon === 'Ubicación') ||
+          p.type === 'Dates' && (textWithoutColon === 'Dates' || textWithoutColon === 'Fechas') ||
+          p.type === 'Date' && (textWithoutColon === 'Date' || textWithoutColon === 'Fecha') ||
+          p.type === 'Description' && (textWithoutColon === 'Description' || textWithoutColon === 'Descripción') ||
+          p.type === 'Minimum Age Requirement' && (textWithoutColon === 'Minimum Age Requirement' || textWithoutColon === 'Requisito de Edad Mínima')
+        );
+        
+        if (originalParagraph) {
+          if (textWithoutColon === 'Location' || textWithoutColon === 'Ubicación') {
+            strong.textContent = t.location + ':';
+            paragraph.innerHTML = strong.outerHTML + ' ' + originalParagraph.content;
+          } else if (textWithoutColon === 'Dates' || textWithoutColon === 'Fechas') {
+            strong.textContent = t.dates + ':';
+            paragraph.innerHTML = strong.outerHTML + ' ' + originalParagraph.content;
+          } else if (textWithoutColon === 'Date' || textWithoutColon === 'Fecha') {
+            strong.textContent = t.date + ':';
+            paragraph.innerHTML = strong.outerHTML + ' ' + originalParagraph.content;
+          } else if (textWithoutColon === 'Description' || textWithoutColon === 'Descripción') {
+            strong.textContent = t.description + ':';
+            paragraph.innerHTML = strong.outerHTML + ' ' + originalParagraph.content;
+          } else if (textWithoutColon === 'Minimum Age Requirement' || textWithoutColon === 'Requisito de Edad Mínima') {
+            strong.textContent = t.minAge + ':';
+            
+            // Extract the age number
+            const ageMatch = originalParagraph.content.match(/\d+/);
+            if (ageMatch) {
+              const age = ageMatch[0];
+              paragraph.innerHTML = strong.outerHTML + ' ' + age + ' ' + t.years;
+            }
+          }
+        }
+      });
+      
+      // Update sign up button
+      const signUpBtn = item.querySelector('.primary-btn');
+      if (signUpBtn) {
+        signUpBtn.textContent = t.signUp;
+      }
+    });
+      
+      // Update no events message
+      if (noEventsMessage) {
+        noEventsMessage.innerHTML = t.noEvents;
+      }
+      
+      // Update toggle button
+      toggleLanguageBtn.textContent = t.toggleLanguage;
+    }
+    
+    toggleLanguageBtn.addEventListener('click', function() {
+      const newLang = currentLanguage === 'en' ? 'es' : 'en';
+      updateLanguage(newLang);
+      localStorage.setItem('volunteerEventsLanguage', newLang);
+    });
+    
+    // Initialize language from localStorage or default to English
+    const savedLanguage = localStorage.getItem('volunteerEventsLanguage') || 'en';
+    if (savedLanguage === 'es') {
+      updateLanguage('es');
+    }
+    
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const eventItems = document.querySelectorAll('.event-item');
+      
+      eventItems.forEach(item => {
+        const eventText = item.textContent.toLowerCase();
+        if (eventText.includes(searchTerm)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      // Show/hide no results message
+      const visibleEvents = document.querySelectorAll('.event-item[style=""]').length;
+      if (visibleEvents === 0 && eventItems.length > 0) {
+        if (!document.getElementById('noResultsMessage')) {
+          const noResults = document.createElement('div');
+          noResults.id = 'noResultsMessage';
+          noResults.className = 'empty-message';
+          noResults.innerHTML = currentLanguage === 'en' 
+            ? '<p>No events match your search. Try different keywords.</p>'
+            : '<p>Ningún evento coincide con su búsqueda. Intente con palabras clave diferentes.</p>';
+          document.getElementById('eventsList').appendChild(noResults);
+        }
+      } else {
+        const noResults = document.getElementById('noResultsMessage');
+        if (noResults) noResults.remove();
+      }
+    });
+    
+    // Date filtering
+    dateFilter.addEventListener('change', function() {
+      const filterValue = this.value;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to beginning of day
+      
+      const eventItems = document.querySelectorAll('.event-item');
+      
+      eventItems.forEach(item => {
+        // Reset display from search filtering
+        if (searchInput.value) {
+          const eventText = item.textContent.toLowerCase();
+          if (!eventText.includes(searchInput.value.toLowerCase())) {
+            item.style.display = 'none';
+            return;
+          }
+        }
+        
+        // Find date elements using standard DOM methods
+        let dateEl = null;
+        const strongElements = item.querySelectorAll('p strong');
+        for (const el of strongElements) {
+          const text = el.textContent.trim();
+          if (text.includes('Date') || text.includes('Fecha')) {
+            dateEl = el;
+            break;
+          }
+        }
+        
+        if (!dateEl || filterValue === 'all') {
+          item.style.display = '';
+          return;
+        }
+        
+        const dateText = dateEl.parentElement.textContent;
+        const dateMatch = dateText.match(/\d{4}-\d{2}-\d{2}/);
+        
+        if (!dateMatch) {
+          item.style.display = '';
+          return;
+        }
+        
+        const eventDate = new Date(dateMatch[0]);
+        
+        if (filterValue === 'upcoming' && eventDate >= today) {
+          item.style.display = '';
+        } else if (filterValue === 'past' && eventDate < today) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      // Show/hide no results message
+      const visibleEvents = document.querySelectorAll('.event-item[style=""]').length;
+      if (visibleEvents === 0 && eventItems.length > 0) {
+        if (!document.getElementById('noResultsMessage')) {
+          const noResults = document.createElement('div');
+          noResults.id = 'noResultsMessage';
+          noResults.className = 'empty-message';
+          noResults.innerHTML = currentLanguage === 'en' 
+            ? '<p>No events match your filter criteria.</p>'
+            : '<p>Ningún evento coincide con sus criterios de filtro.</p>';
+          document.getElementById('eventsList').appendChild(noResults);
+        }
+      } else {
+        const noResults = document.getElementById('noResultsMessage');
+        if (noResults) noResults.remove();
+      }
+    });
+    
+    // We no longer need the jQuery-like contains selector helper
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+<!-- frontend/templates/error.html -->
+{% extends "base.html" %}
+
+{% block title %}Error - {{ error_title }}{% endblock %}
+
+{% block header %}{{ error_title }}{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h2 class="error-title">{{ error_title }}</h2>
+    <p class="error-message">{{ error_message }}</p>
+    
+    <div class="error-details">
+      <h3>Possible Solutions:</h3>
+      <ul>
+        <li>Check if your MongoDB Atlas cluster is running</li>
+        <li>Verify your IP address is whitelisted in MongoDB Atlas</li>
+        <li>Confirm the username and password in the connection string are correct</li>
+        <li>Make sure your network allows connections to MongoDB Atlas</li>
+      </ul>
+    </div>
+    
+    <div class="error-actions">
+      <a href="/" class="primary-btn">Return to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Add any error-specific JavaScript here
+</script>
+{% endblock %}

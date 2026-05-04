@@ -1,0 +1,36 @@
+<!-- frontend/templates/admin/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Admin Login{% endblock %}
+
+{% block header %}Admin Login{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  {% if error %}
+  <div class="error-message">
+    <p>{{ error }}</p>
+  </div>
+  {% endif %}
+  
+  <form method="POST" action="{{ url_for('admin_routes.login') }}" class="login-form">
+    <div class="form-group">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+    
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="login-button">Login</button>
+    </div>
+  </form>
+  
+  <div class="login-help">
+    <p>For admin access only. <a href="{{ url_for('volunteer_routes.events_list') }}">View volunteer opportunities</a> or access sign-up forms through the provided links.</p>
+  </div>
+</div>
+{% endblock %}

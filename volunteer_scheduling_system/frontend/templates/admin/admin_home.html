@@ -1,0 +1,356 @@
+<!-- frontend/templates/admin/admin_home.html -->
+{% extends "base.html" %}
+
+{% block title %}Volunteer Management{% endblock %}
+
+{% block header %}Volunteer Management System{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+  <div class="admin-actions">
+    <a href="{{ url_for('volunteer_routes.events_list') }}" class="logout-link" target="_blank">Go to Events</a>
+    <a href="{{ url_for('admin_routes.logout') }}" class="logout-link">Logout</a>
+  </div>
+</div>
+
+<div class="section">
+  <p class="instructions">
+    Create volunteer events and easily collect sign-ups. Each event you create will have:
+    <ul>
+      <li>A sign-up form link you can share with volunteers</li>
+      <li>A dashboard to view and export volunteer information</li>
+    </ul>
+  </p>
+
+  <button id="createEventBtn" onclick="openEventModal()" class="primary-btn">Create New Event</button>
+  <div id="eventsList" class="event-list"></div>
+</div>
+
+<!-- Modal to create a new event -->
+<div id="eventModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content wide-modal">
+    <h2 id="modalTitle">Create a New Event</h2>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label for="eventIdInput">Event ID:</label>
+        <input type="text" id="eventIdInput" placeholder="e.g., obhp2025">
+        <small>Short code used in URLs (no spaces)</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="eventNameInput">Event Name:</label>
+        <input type="text" id="eventNameInput" placeholder="e.g., Operation Border Health 2025">
+        <small>Full name displayed on forms</small>
+      </div>
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label for="eventLocationInput">Event Location:</label>
+        <input type="text" id="eventLocationInput" placeholder="e.g., Laredo Health Department">
+        <small>Where volunteers will be working</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="minAgeInput">Minimum Age Requirement:</label>
+        <input type="number" id="minAgeInput" min="0" max="100" value="18">
+        <small>Minimum age to volunteer (0 for no restriction)</small>
+      </div>
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label for="eventStartDateInput">Event Start Date:</label>
+        <input type="date" id="eventStartDateInput">
+        <small>When the event begins</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="eventEndDateInput">Event End Date:</label>
+        <input type="date" id="eventEndDateInput">
+        <small>When the event ends (optional)</small>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="eventDescriptionInput">Event Description:</label>
+      <textarea id="eventDescriptionInput" rows="3" placeholder="Describe the event and what volunteers will be doing..."></textarea>
+      <small>Optional description to display on the volunteer form</small>
+    </div>
+    
+    <h3>Event Schedule</h3>
+    <p class="field-instructions">Select the days and configure shifts that will be available for this event:</p>
+    
+    <div class="schedule-selector">
+      <div class="dynamic-shifts-container">
+        <!-- Monday -->
+        <div class="day-shifts-container" id="monday_container">
+          <div class="day-header">
+            <input type="checkbox" id="include_monday" checked>
+            <label for="include_monday">Monday</label>
+          </div>
+          <div class="day-shifts" id="monday_shifts">
+            <div class="shifts-controls">
+              <label for="monday_shift_count">Number of shifts:</label>
+              <input type="number" id="monday_shift_count" min="1" max="5" value="2" class="shift-count-input">
+              <button type="button" class="add-shift-btn" data-day="monday">Update Shifts</button>
+            </div>
+            <div class="shift-times-container" id="monday_shift_times">
+              <div class="shift-time-row">
+                <label>Shift 1:</label>
+                <input type="time" class="shift-start-time" id="monday_shift1_start" value="07:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="monday_shift1_end" value="12:30">
+              </div>
+              <div class="shift-time-row">
+                <label>Shift 2:</label>
+                <input type="time" class="shift-start-time" id="monday_shift2_start" value="12:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="monday_shift2_end" value="16:00">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tuesday -->
+        <div class="day-shifts-container" id="tuesday_container">
+          <div class="day-header">
+            <input type="checkbox" id="include_tuesday" checked>
+            <label for="include_tuesday">Tuesday</label>
+          </div>
+          <div class="day-shifts" id="tuesday_shifts">
+            <div class="shifts-controls">
+              <label for="tuesday_shift_count">Number of shifts:</label>
+              <input type="number" id="tuesday_shift_count" min="1" max="5" value="2" class="shift-count-input">
+              <button type="button" class="add-shift-btn" data-day="tuesday">Update Shifts</button>
+            </div>
+            <div class="shift-times-container" id="tuesday_shift_times">
+              <div class="shift-time-row">
+                <label>Shift 1:</label>
+                <input type="time" class="shift-start-time" id="tuesday_shift1_start" value="07:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="tuesday_shift1_end" value="12:30">
+              </div>
+              <div class="shift-time-row">
+                <label>Shift 2:</label>
+                <input type="time" class="shift-start-time" id="tuesday_shift2_start" value="12:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="tuesday_shift2_end" value="16:00">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Wednesday -->
+        <div class="day-shifts-container" id="wednesday_container">
+          <div class="day-header">
+            <input type="checkbox" id="include_wednesday" checked>
+            <label for="include_wednesday">Wednesday</label>
+          </div>
+          <div class="day-shifts" id="wednesday_shifts">
+            <div class="shifts-controls">
+              <label for="wednesday_shift_count">Number of shifts:</label>
+              <input type="number" id="wednesday_shift_count" min="1" max="5" value="2" class="shift-count-input">
+              <button type="button" class="add-shift-btn" data-day="wednesday">Update Shifts</button>
+            </div>
+            <div class="shift-times-container" id="wednesday_shift_times">
+              <div class="shift-time-row">
+                <label>Shift 1:</label>
+                <input type="time" class="shift-start-time" id="wednesday_shift1_start" value="07:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="wednesday_shift1_end" value="12:30">
+              </div>
+              <div class="shift-time-row">
+                <label>Shift 2:</label>
+                <input type="time" class="shift-start-time" id="wednesday_shift2_start" value="12:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="wednesday_shift2_end" value="16:00">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Thursday -->
+        <div class="day-shifts-container" id="thursday_container">
+          <div class="day-header">
+            <input type="checkbox" id="include_thursday" checked>
+            <label for="include_thursday">Thursday</label>
+          </div>
+          <div class="day-shifts" id="thursday_shifts">
+            <div class="shifts-controls">
+              <label for="thursday_shift_count">Number of shifts:</label>
+              <input type="number" id="thursday_shift_count" min="1" max="5" value="2" class="shift-count-input">
+              <button type="button" class="add-shift-btn" data-day="thursday">Update Shifts</button>
+            </div>
+            <div class="shift-times-container" id="thursday_shift_times">
+              <div class="shift-time-row">
+                <label>Shift 1:</label>
+                <input type="time" class="shift-start-time" id="thursday_shift1_start" value="07:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="thursday_shift1_end" value="12:30">
+              </div>
+              <div class="shift-time-row">
+                <label>Shift 2:</label>
+                <input type="time" class="shift-start-time" id="thursday_shift2_start" value="12:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="thursday_shift2_end" value="16:00">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Friday -->
+        <div class="day-shifts-container" id="friday_container">
+          <div class="day-header">
+            <input type="checkbox" id="include_friday" checked>
+            <label for="include_friday">Friday</label>
+          </div>
+          <div class="day-shifts" id="friday_shifts">
+            <div class="shifts-controls">
+              <label for="friday_shift_count">Number of shifts:</label>
+              <input type="number" id="friday_shift_count" min="1" max="5" value="2" class="shift-count-input">
+              <button type="button" class="add-shift-btn" data-day="friday">Update Shifts</button>
+            </div>
+            <div class="shift-times-container" id="friday_shift_times">
+              <div class="shift-time-row">
+                <label>Shift 1:</label>
+                <input type="time" class="shift-start-time" id="friday_shift1_start" value="07:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="friday_shift1_end" value="12:30">
+              </div>
+              <div class="shift-time-row">
+                <label>Shift 2:</label>
+                <input type="time" class="shift-start-time" id="friday_shift2_start" value="12:30">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="friday_shift2_end" value="16:00">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Saturday -->
+        <div class="day-shifts-container" id="saturday_container">
+          <div class="day-header">
+            <input type="checkbox" id="include_saturday">
+            <label for="include_saturday">Saturday</label>
+          </div>
+          <div class="day-shifts" id="saturday_shifts" style="display: none;">
+            <div class="shifts-controls">
+              <label for="saturday_shift_count">Number of shifts:</label>
+              <input type="number" id="saturday_shift_count" min="1" max="5" value="1" class="shift-count-input">
+              <button type="button" class="add-shift-btn" data-day="saturday">Update Shifts</button>
+            </div>
+            <div class="shift-times-container" id="saturday_shift_times">
+              <div class="shift-time-row">
+                <label>Shift 1:</label>
+                <input type="time" class="shift-start-time" id="saturday_shift1_start" value="09:00">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="saturday_shift1_end" value="14:00">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sunday -->
+        <div class="day-shifts-container" id="sunday_container">
+          <div class="day-header">
+            <input type="checkbox" id="include_sunday">
+            <label for="include_sunday">Sunday</label>
+          </div>
+          <div class="day-shifts" id="sunday_shifts" style="display: none;">
+            <div class="shifts-controls">
+              <label for="sunday_shift_count">Number of shifts:</label>
+              <input type="number" id="sunday_shift_count" min="1" max="5" value="1" class="shift-count-input">
+              <button type="button" class="add-shift-btn" data-day="sunday">Update Shifts</button>
+            </div>
+            <div class="shift-times-container" id="sunday_shift_times">
+              <div class="shift-time-row">
+                <label>Shift 1:</label>
+                <input type="time" class="shift-start-time" id="sunday_shift1_start" value="09:00">
+                <span>to</span>
+                <input type="time" class="shift-end-time" id="sunday_shift1_end" value="14:00">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <h3>Form Fields</h3>
+    <p class="field-instructions">Select the fields you want to include in your volunteer form:</p>
+    
+    <div class="field-selector">
+      <!-- Required fields (always included) -->
+      <div class="field-group required-fields">
+        <h4>Required Information</h4>
+        <div class="field-item checked disabled">
+          <input type="checkbox" id="field_first_name" checked disabled>
+          <label for="field_first_name">First Name</label>
+        </div>
+        <div class="field-item checked disabled">
+          <input type="checkbox" id="field_last_name" checked disabled>
+          <label for="field_last_name">Last Name</label>
+        </div>
+        <div class="field-item checked disabled">
+          <input type="checkbox" id="field_email" checked disabled>
+          <label for="field_email">Email Address</label>
+        </div>
+        <div class="field-item checked disabled">
+          <input type="checkbox" id="field_phone" checked disabled>
+          <label for="field_phone">Phone Number</label>
+        </div>
+        <div class="field-item checked disabled">
+          <input type="checkbox" id="field_shifts" checked disabled>
+          <label for="field_shifts">Available Shifts</label>
+        </div>
+      </div>
+      
+      <!-- Optional fields -->
+      <div class="field-group optional-fields">
+        <h4>Additional Information</h4>
+        <div class="field-item">
+          <input type="checkbox" id="field_organization" checked>
+          <label for="field_organization">Organization</label>
+        </div>
+        <div class="field-item">
+          <input type="checkbox" id="field_certifications" checked>
+          <label for="field_certifications">Certifications & Other Training</label>
+        </div>
+        <div class="field-item">
+          <input type="checkbox" id="field_emergency_contact" checked>
+          <label for="field_emergency_contact">Emergency Contact</label>
+        </div>
+      </div>
+      
+      <!-- Commitment fields -->
+      <div class="field-group optional-fields">
+        <h4>Commitment Questions</h4>
+        <div class="field-item">
+          <input type="checkbox" id="field_commit_location" checked>
+          <label for="field_commit_location">Commitment to Location</label>
+        </div>
+        <div class="field-item">
+          <input type="checkbox" id="field_online_training" checked>
+          <label for="field_online_training">Online Training Commitment</label>
+        </div>
+        <div class="field-item">
+          <input type="checkbox" id="field_moa_ma_ems">
+          <label for="field_moa_ma_ems">MOA/MA/EMS Certification</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-buttons">
+      <button id="submitEventBtn" onclick="submitEventWithFields()" class="modal-button">Create Event</button>
+      <button onclick="closeEventModal()" class="modal-button cancel">Cancel</button>
+    </div>
+    <input type="hidden" id="editMode" value="false">
+    <input type="hidden" id="originalEventId" value="">
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/admin/admin_home.js"></script>
+{% endblock %}

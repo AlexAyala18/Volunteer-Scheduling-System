@@ -1,0 +1,75 @@
+<!-- frontend/templates/admin/event_dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Volunteer Management{% endblock %}
+
+{% block header %}Volunteer Sign-ups{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+  <div class="admin-actions">
+    <a href="{{ url_for('admin_routes.admin_home') }}" class="back-link">← Back to Events</a>
+    <a href="{{ url_for('volunteer_routes.events_list') }}" class="logout-link">Go to Events</a>
+    <a href="{{ url_for('admin_routes.logout') }}" class="logout-link">Logout</a>
+  </div>
+</div>
+
+<div class="dashboard-header">
+  <h2 id="eventNameDisplay">Loading event information...</h2>
+  <p class="dashboard-description">View and manage volunteer sign-ups for this event.</p>
+</div>
+
+<div class="dashboard-controls">
+  <div class="search-container wide-search">
+    <input type="text" id="searchInput" placeholder="Search by name, email, or organization...">
+  </div>
+
+  <div class="button-container">
+    <button id="exportExcelBtn" class="export-button">
+      <span class="icon">📊</span> Download Spreadsheet
+    </button>
+  </div>
+</div>
+
+<div class="table-container">
+  <table id="volunteers-table">
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Organization</th>
+        <th>Shifts</th>
+        <th>Certifications</th>
+        <th>Emergency Contact</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Table will be populated by JavaScript -->
+      <tr>
+        <td colspan="9" class="loading-message">Loading volunteer data...</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="dashboard-footer">
+  <div class="dashboard-tips">
+    <h3>Tips</h3>
+    <ul>
+      <li>Type in the search box to quickly find volunteers</li>
+      <li>Click "Download Spreadsheet" to get an Excel file with all volunteer information</li>
+      <li>The spreadsheet includes separate tabs for each day of the week</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const EVENT_ID = "{{ event_id }}";
+</script>
+<script src="/static/js/admin/event_dashboard.js"></script>
+{% endblock %}

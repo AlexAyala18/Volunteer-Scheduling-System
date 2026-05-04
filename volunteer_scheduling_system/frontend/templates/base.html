@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>{% block title %}Volunteer System{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="logo-container">
+    <img src="/static/img/laredo_public_health.png" alt="Laredo Public Health Logo">
+  </div>
+  
+  <h1>{% block header %}Volunteer System{% endblock %}</h1>
+  
+  {% block content %}{% endblock %}
+  
+  <footer>
+    &copy; 2025 Volunteer System - Laredo Public Health
+  </footer>
+  
+  {% block scripts %}{% endblock %}
+</body>
+</html>
